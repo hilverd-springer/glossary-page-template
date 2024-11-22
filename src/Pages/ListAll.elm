@@ -1006,8 +1006,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : GlossaryForUi -> Model -> Html Msg
-viewSettings glossaryForUi model =
+viewSettings : GlossaryForUi -> Bool -> Model -> Html Msg
+viewSettings glossaryForUi tabbable model =
     let
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1023,7 +1023,7 @@ viewSettings glossaryForUi model =
         , class "pt-4 pr-4 pl-4 pb-2"
         ]
         [ details
-            [ Accessibility.Key.tabbable <| noModalDialogShown model
+            [ Accessibility.Key.tabbable tabbable
             , class "relative"
             ]
             [ Extras.Html.showIf (model.savingSettings == SavingInProgress) <|
@@ -1051,8 +1051,8 @@ viewSettings glossaryForUi model =
                         ]
                 , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax model.common.enableMathSupport
-                , viewSelectCardWidth glossaryForUi <| noModalDialogShown model
-                , viewSelectDefaultTheme glossaryForUi <| noModalDialogShown model
+                , viewSelectCardWidth glossaryForUi tabbable
+                , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
                     (GlossaryForUi.enableExportMenu glossaryForUi)
                     ElementIds.showExportMenuLabel
@@ -2708,7 +2708,7 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi model
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi (noModalDialogShown model) model
                                 , h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
