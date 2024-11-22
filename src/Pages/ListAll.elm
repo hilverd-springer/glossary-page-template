@@ -1632,6 +1632,33 @@ viewCards { enableMathSupport, enableOrderItemsButtons, editable, tabbable, enab
         ]
 
 
+viewMenuForMobileAndStaticSidebarForDesktop :
+    MenuForMobileVisibility
+    -> { runningOnMacOs : Bool, enableMathSupport : Bool, tabbable : Bool }
+    -> Maybe TagId
+    -> GlossaryItemsForUi
+    -> Html Msg
+viewMenuForMobileAndStaticSidebarForDesktop menuForMobileVisibility { runningOnMacOs, enableMathSupport, tabbable } filterByTag items =
+    let
+        indexOfTerms : IndexOfTerms
+        indexOfTerms =
+            IndexOfTerms.fromGlossaryItems filterByTag items
+    in
+    div []
+        [ Html.Lazy.lazy4 viewMenuForMobile
+            menuForMobileVisibility
+            enableMathSupport
+            tabbable
+            indexOfTerms
+        , Html.Lazy.lazy2 viewStaticSidebarForDesktop
+            { runningOnMacOs = runningOnMacOs
+            , enableMathSupport = enableMathSupport
+            , tabbable = tabbable
+            }
+            indexOfTerms
+        ]
+
+
 viewMenuForMobile : MenuForMobileVisibility -> Bool -> Bool -> IndexOfTerms -> Html Msg
 viewMenuForMobile menuForMobileVisibility enableMathSupport tabbable termIndex =
     div
@@ -2460,6 +2487,23 @@ controlOrCommandK runningOnMacOs =
         Extras.HtmlEvents.controlK
 
 
+
+{-
+
+      What might be causing the slowness when you open the search dialog?
+
+      What happens when you do this?
+
+   1. SearchDialogMsg Components.SearchDialog.show
+   1. model.searchDialog changes
+   1. the view function will be reevaluated, and apparently this is slow
+   1. to prevent the slowness, use Html.Lazy
+     * need to minimise changes in the arguments to the various lazy calls
+     * need to minimise expensive calculations inside the view function
+
+-}
+
+
 view : Model -> Document Msg
 view model =
     case model.common.glossaryForUi of
@@ -2613,17 +2657,14 @@ view model =
                             )
                         )
                     ]
-                    [ Html.Lazy.lazy4 viewMenuForMobile
+                    [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
                         model.menuForMobileVisibility
-                        model.common.enableMathSupport
-                        noModalDialogShown_
-                        indexOfTerms
-                    , Html.Lazy.lazy2 viewStaticSidebarForDesktop
                         { runningOnMacOs = model.common.runningOnMacOs
                         , enableMathSupport = model.common.enableMathSupport
                         , tabbable = noModalDialogShown_
                         }
-                        indexOfTerms
+                        filterByTag_
+                        items
                     , div
                         [ class "hidden lg:block" ]
                         [ Html.Lazy.lazy viewBackToTopLink { staticSidebar = True, visibility = model.backToTopLinkVisibility } ]
