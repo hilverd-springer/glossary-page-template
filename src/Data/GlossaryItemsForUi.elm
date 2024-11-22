@@ -533,32 +533,45 @@ disambiguatedPreferredTerm itemId (GlossaryItemsForUi items) =
         disambiguationTag : Maybe Tag
         disambiguationTag =
             disambiguationTagId
-                |> Maybe.andThen
-                    (\disambiguationTagId_ ->
-                        let
-                            tagById : TagIdDict Tag
-                            tagById =
-                                GlossaryTags.tagById items.tags
-                        in
-                        TagIdDict.get disambiguationTagId_ tagById
-                    )
+                |> (if 1 + 1 > 1 then
+                        always Nothing
+
+                    else
+                        Maybe.andThen
+                            (\disambiguationTagId_ ->
+                                -- this seems slow
+                                let
+                                    tagById : TagIdDict Tag
+                                    tagById =
+                                        GlossaryTags.tagById items.tags
+                                in
+                                TagIdDict.get disambiguationTagId_ tagById
+                            )
+                   )
     in
     maybePreferredTerm
-        |> Maybe.map
-            (\preferredTerm_ ->
-                disambiguationTag
-                    |> Maybe.map
-                        (\disambiguationTag_ ->
-                            GlossaryItemForUi.disambiguatedTerm disambiguationTag_ preferredTerm_
-                        )
-                    |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
-            )
+        |> (if 1 + 2 > 2 then
+                always Nothing
+
+            else
+                -- this seems slow
+                Maybe.map
+                    (\preferredTerm_ ->
+                        disambiguationTag
+                            |> Maybe.map
+                                (\disambiguationTag_ ->
+                                    GlossaryItemForUi.disambiguatedTerm disambiguationTag_ preferredTerm_
+                                )
+                            |> Maybe.withDefault (DisambiguatedTerm.fromTerm preferredTerm_)
+                    )
+           )
 
 
 {-| All the disambiguated preferred terms in these glossary items.
 -}
 disambiguatedPreferredTerms : Maybe TagId -> GlossaryItemsForUi -> List ( GlossaryItemId, DisambiguatedTerm )
 disambiguatedPreferredTerms filterByTagId ((GlossaryItemsForUi items) as glossaryItemsForUi) =
+    -- This seems slow
     let
         itemIds : List GlossaryItemId
         itemIds =

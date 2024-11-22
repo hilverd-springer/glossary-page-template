@@ -2599,7 +2599,9 @@ view model =
                                         else
                                             let
                                                 itemWithPreviousAndNext =
-                                                    items
+                                                    -- items
+                                                    GlossaryItemsForUi.empty
+                                                        -- temporary change
                                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                                 Alphabetically ->
                                                                     GlossaryItemsForUi.orderedAlphabetically filterByTag_
@@ -2646,6 +2648,7 @@ view model =
                         )
                     ]
                     [ Html.Lazy.lazy4 viewMenuForMobileAndStaticSidebarForDesktop
+                        -- <-- this one also seems slow
                         model.menuForMobileVisibility
                         { runningOnMacOs = model.common.runningOnMacOs
                         , enableMathSupport = model.common.enableMathSupport
@@ -2759,7 +2762,10 @@ view model =
                                     [ Html.Attributes.id ElementIds.items
                                     , Extras.HtmlAttribute.showIf (GlossaryForUi.enableOrderItemsButtons glossaryForUi) <| class "mt-3 pt-2 border-t border-gray-300 dark:border-gray-700"
                                     ]
-                                    [ items
+                                    [ --items
+                                      -- |> always GlossaryItemsForUi.empty
+                                      GlossaryItemsForUi.empty
+                                        -- temporary change
                                         |> (case QueryParameters.orderItemsBy model.common.queryParameters of
                                                 Alphabetically ->
                                                     GlossaryItemsForUi.orderedAlphabetically filterByTag_
@@ -2773,7 +2779,8 @@ view model =
                                                     let
                                                         itemId : Maybe GlossaryItemId
                                                         itemId =
-                                                            GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                                            -- GlossaryItemsForUi.itemIdFromRawDisambiguatedPreferredTerm termId items
+                                                            Nothing
                                                     in
                                                     case itemId of
                                                         Just itemId_ ->
@@ -2781,7 +2788,8 @@ view model =
 
                                                         Nothing ->
                                                             always
-                                                                (items
+                                                                -- items
+                                                                (GlossaryItemsForUi.empty
                                                                     |> GlossaryItemsForUi.orderedAlphabetically filterByTag_
                                                                     |> (\lhs -> ( lhs, [] ))
                                                                 )
