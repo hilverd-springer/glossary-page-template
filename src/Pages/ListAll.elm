@@ -1263,13 +1263,13 @@ itemWithPreviousAndNextForId id indexedGlossaryItems =
 
 
 viewSingleItemModalDialog :
-    Model
-    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, enableLastUpdatedDates : Bool }
+    Maybe GlossaryItemId
+    -> { enableMathSupport : Bool, editable : Bool, tabbable : Bool, noModalDialogShown_ : Bool, enableLastUpdatedDates : Bool }
     -> Maybe Tag
     -> List ( GlossaryItemId, GlossaryItemForUi )
     -> Maybe GlossaryItemId
     -> Html Msg
-viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableLastUpdatedDates } tagBeingFilteredBy indexedGlossaryItems =
+viewSingleItemModalDialog itemWithFocus { enableMathSupport, editable, tabbable, enableLastUpdatedDates, noModalDialogShown_ } tagBeingFilteredBy indexedGlossaryItems =
     Maybe.map
         (\id ->
             let
@@ -1301,9 +1301,9 @@ viewSingleItemModalDialog model { enableMathSupport, editable, tabbable, enableL
                             , editable = editable
                             , enableLastUpdatedDates = enableLastUpdatedDates
                             , shownAsSingle = True
-                            , noModalDialogShown_ = noModalDialogShown model
+                            , noModalDialogShown_ = noModalDialogShown_
                             }
-                            model.itemWithFocus
+                            itemWithFocus
                             tagBeingFilteredBy
                             itemWithPreviousAndNext
                         ]
@@ -2833,10 +2833,11 @@ view model =
                                         model.confirmDeleteId
                                         model.deleting
                                     , viewSingleItemModalDialog
-                                        model
+                                        model.itemWithFocus
                                         { enableMathSupport = model.common.enableMathSupport
                                         , editable = Editability.editing model.common.editability
                                         , tabbable = noModalDialogShown_
+                                        , noModalDialogShown_ = noModalDialogShown_
                                         , enableLastUpdatedDates = GlossaryForUi.enableLastUpdatedDates glossaryForUi
                                         }
                                         filterByTag
