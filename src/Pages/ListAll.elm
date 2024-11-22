@@ -1006,8 +1006,8 @@ viewMakingChangesHelp resultOfAttemptingToCopyEditorCommandToClipboard filename 
         ]
 
 
-viewSettings : GlossaryForUi -> Bool -> Model -> Html Msg
-viewSettings glossaryForUi tabbable model =
+viewSettings : GlossaryForUi -> Editability -> Saving -> { tabbable : Bool, enableMathSupport : Bool } -> Html Msg
+viewSettings glossaryForUi editability savingSettings { tabbable, enableMathSupport } =
     let
         errorDiv : String -> Html msg
         errorDiv message =
@@ -1026,12 +1026,12 @@ viewSettings glossaryForUi tabbable model =
             [ Accessibility.Key.tabbable tabbable
             , class "relative"
             ]
-            [ Extras.Html.showIf (model.savingSettings == SavingInProgress) <|
+            [ Extras.Html.showIf (savingSettings == SavingInProgress) <|
                 div
                     [ class "absolute top-1/2 bottom-1/2 left-1/2 right-1/2" ]
                     [ Components.Spinner.view
                         [ Svg.Attributes.class "w-12 h-12" ]
-                        (model.savingSettings == SavingInProgress)
+                        (savingSettings == SavingInProgress)
                     ]
             , summary
                 [ class "pb-1 text-lg leading-6 items-center font-medium text-gray-900 dark:text-gray-100 select-none" ]
@@ -1041,16 +1041,16 @@ viewSettings glossaryForUi tabbable model =
                 ]
             , div
                 [ class "space-y-8 py-4"
-                , Extras.HtmlAttribute.showIf (model.savingSettings == SavingInProgress) <|
+                , Extras.HtmlAttribute.showIf (savingSettings == SavingInProgress) <|
                     class "opacity-25"
                 ]
-                [ Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
+                [ Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
                     p
                         [ class "mt-3 max-w-xl" ]
                         [ text I18n.theseSettingsAreUpdatedInTheHtmlFile
                         ]
-                , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
-                    viewSelectInputSyntax model.common.enableMathSupport
+                , Extras.Html.showIf (editability == EditingWithIncludedBackend) <|
+                    viewSelectInputSyntax enableMathSupport
                 , viewSelectCardWidth glossaryForUi tabbable
                 , viewSelectDefaultTheme glossaryForUi tabbable
                 , Components.Button.toggle
@@ -1077,7 +1077,7 @@ viewSettings glossaryForUi tabbable model =
                         [ class "font-medium text-gray-900 dark:text-gray-300" ]
                         [ text I18n.showLastUpdatedDates ]
                     ]
-                , case model.savingSettings of
+                , case savingSettings of
                     SavingNotAttempted errorMessage ->
                         errorDiv <| I18n.failedToSave ++ " — " ++ errorMessage ++ "."
 
@@ -2517,10 +2517,6 @@ view model =
                 filterByTagWithDescription_ =
                     filterByTagWithDescription model
 
-                indexOfTerms : IndexOfTerms
-                indexOfTerms =
-                    IndexOfTerms.fromGlossaryItems filterByTag_ items
-
                 controlOrCommandK_ : Extras.HtmlEvents.KeyDownEvent
                 controlOrCommandK_ =
                     controlOrCommandK model.common.runningOnMacOs
@@ -2708,7 +2704,13 @@ view model =
                                     ]
                                 , viewMakingChangesHelp model.resultOfAttemptingToCopyEditorCommandToClipboard model.common.filename noModalDialogShown_
                                     |> Extras.Html.showIf (model.common.editability == ReadOnlyWithHelpForMakingChanges)
-                                , Extras.Html.showIf (Editability.editing model.common.editability) <| viewSettings glossaryForUi (noModalDialogShown model) model
+                                , Extras.Html.showIf (Editability.editing model.common.editability) <|
+                                    viewSettings glossaryForUi
+                                        model.common.editability
+                                        model.savingSettings
+                                        { tabbable = noModalDialogShown model
+                                        , enableMathSupport = model.common.enableMathSupport
+                                        }
                                 , h1
                                     [ id ElementIds.title ]
                                     [ filterByTagWithDescription_
