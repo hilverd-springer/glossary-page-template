@@ -1052,7 +1052,7 @@ viewSettings glossaryForUi model =
                 , Extras.Html.showIf (model.common.editability == EditingWithIncludedBackend) <|
                     viewSelectInputSyntax model.common.enableMathSupport
                 , viewSelectCardWidth glossaryForUi model
-                , viewSelectDefaultTheme glossaryForUi model
+                , viewSelectDefaultTheme glossaryForUi <| noModalDialogShown model
                 , Components.Button.toggle
                     (GlossaryForUi.enableExportMenu glossaryForUi)
                     ElementIds.showExportMenuLabel
@@ -2116,13 +2116,9 @@ viewSelectCardWidth glossaryForUi model =
         ]
 
 
-viewSelectDefaultTheme : GlossaryForUi -> Model -> Html Msg
-viewSelectDefaultTheme glossaryForUi model =
+viewSelectDefaultTheme : GlossaryForUi -> Bool -> Html Msg
+viewSelectDefaultTheme glossaryForUi tabbable =
     let
-        tabbable : Bool
-        tabbable =
-            noModalDialogShown model
-
         defaultTheme : Theme
         defaultTheme =
             GlossaryForUi.defaultTheme glossaryForUi
